@@ -1,0 +1,106 @@
+{
+  "id": "com.freegrilly",
+  "version": "1.0.0",
+  "compatibility": ">=12.0.0",
+  "sdk": 3,
+  "platforms": ["local"],
+  "name": {
+    "en": "FreeGrilly"
+  },
+  "description": {
+    "en": "Monitor your FreeGrilly grill thermometer"
+  },
+  "tags": {
+    "en": ["grill", "thermometer", "temperature", "bbq", "freegrilly"]
+  },
+  "category": ["tools"],
+  "author": {
+    "name": "FreeGrilly"
+  },
+  "drivers": [
+    {
+      "id": "thermometer",
+      "name": {
+        "en": "FreeGrilly Thermometer"
+      },
+      "class": "sensor",
+      "capabilities": [
+        "measure_temperature.probe1",
+        "measure_temperature.probe2",
+        "measure_temperature.probe3",
+        "measure_temperature.probe4",
+        "measure_temperature.probe5",
+        "measure_temperature.probe6",
+        "measure_temperature.probe7",
+        "measure_temperature.probe8",
+        "measure_battery",
+        "alarm_battery"
+      ],
+      "capabilitiesOptions": {
+        "measure_temperature.probe1": {
+          "title": { "en": "Probe 1" },
+          "decimals": 1
+        },
+        "measure_temperature.probe2": {
+          "title": { "en": "Probe 2" },
+          "decimals": 1
+        },
+        "measure_temperature.probe3": {
+          "title": { "en": "Probe 3" },
+          "decimals": 1
+        },
+        "measure_temperature.probe4": {
+          "title": { "en": "Probe 4" },
+          "decimals": 1
+        },
+        "measure_temperature.probe5": {
+          "title": { "en": "Probe 5" },
+          "decimals": 1
+        },
+        "measure_temperature.probe6": {
+          "title": { "en": "Probe 6" },
+          "decimals": 1
+        },
+        "measure_temperature.probe7": {
+          "title": { "en": "Probe 7" },
+          "decimals": 1
+        },
+        "measure_temperature.probe8": {
+          "title": { "en": "Probe 8" },
+          "decimals": 1
+        }
+      },
+      "pair": [
+        {
+          "id": "start"
+        },
+        {
+          "id": "add_device",
+          "template": "add_device"
+        }
+      ],
+      "settings": [
+        {
+          "id": "ip",
+          "type": "text",
+          "label": {
+            "en": "IP Address"
+          },
+          "value": "192.168.200.10"
+        },
+        {
+          "id": "poll_interval",
+          "type": "number",
+          "label": {
+            "en": "Poll interval (seconds)"
+          },
+          "value": 5,
+          "attr": {
+            "min": 1,
+            "max": 60
+          }
+        }
+      ]
+    }
+  ]
+}
