@@ -1,0 +1,11 @@
+{
+  "pair": {
+    "error": {
+      "connect": "Could not connect to the device. Please check the IP address and try again."
+    }
+  },
+  "settings": {
+    "ip": "IP Address",
+    "poll_interval": "Poll interval (seconds)"
+  }
+}

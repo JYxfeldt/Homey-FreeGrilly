@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport json\nfor path in ['/home/user/Homey-FreeGrilly/app.json', '/home/user/Homey-FreeGrilly/package.json']:\n    with open(path, 'r') as f:\n        data = json.load(f)\n    parts = data['version'].split('.')\n    parts[2] = str(int(parts[2]) + 1)\n    data['version'] = '.'.join(parts)\n    with open(path, 'w') as f:\n        json.dump(data, f, indent=2)\n        f.write('\\n')\n\" 2>/dev/null || true",
+            "statusMessage": "Bumping patch version..."
+          }
+        ]
+      }
+    ]
+  }
+}
