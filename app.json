@@ -1,6 +1,6 @@
 {
   "id": "se.yxfeldt.freegrilly",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "compatibility": ">=12.0.0",
   "sdk": 3,
   "platforms": [
@@ -101,8 +101,8 @@
           "id": "start"
         },
         {
-          "id": "add_device",
-          "template": "add_device"
+          "id": "list_devices",
+          "template": "list_devices"
         }
       ],
       "settings": [
