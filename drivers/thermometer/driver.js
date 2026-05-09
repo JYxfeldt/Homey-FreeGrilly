@@ -11,16 +11,18 @@ class FreeGrillyDriver extends Homey.Driver {
   async onPair(session) {
     let pendingDevice = null;
 
-    session.setHandler('validate', async (ip) => {
-      const data = await this._fetchGrill(ip);
+    // Called by the login_credentials built-in template
+    session.setHandler('login', async ({ username: ip }) => {
+      const data = await this._fetchGrill(ip.trim());
       pendingDevice = {
         name: data.name || 'FreeGrilly',
         data: { id: data.unique_id || ip },
-        settings: { ip, poll_interval: 5 },
+        settings: { ip: ip.trim(), poll_interval: 5 },
       };
-      return pendingDevice.name;
+      return true;
     });
 
+    // Called by the list_devices built-in template
     session.setHandler('list_devices', async () => {
       if (!pendingDevice) return [];
       return [pendingDevice];
