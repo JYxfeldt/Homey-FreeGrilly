@@ -1,6 +1,6 @@
 {
   "name": "se.yxfeldt.freegrilly",
-  "version": "0.1.7",
+  "version": "0.1.10",
   "main": "app.js",
   "engines": {
     "node": ">=16.0.0"

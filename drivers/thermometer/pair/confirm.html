@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 24px;
+      color: #333;
+    }
+    h2 { font-size: 18px; margin-bottom: 8px; }
+    .device-name {
+      font-size: 16px;
+      font-weight: 500;
+      margin: 16px 0 4px;
+    }
+    .device-ip {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 24px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #e85d04;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    button.loading {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+    .error {
+      margin-top: 12px;
+      color: #c0392b;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Found device</h2>
+  <p class="device-name" id="name">FreeGrilly</p>
+  <p class="device-ip" id="ip"></p>
+  <button id="btn">Add device</button>
+  <p class="error" id="error"></p>
+
+  <script>
+    function onHomeyReady(Homey) {
+      Homey.ready();
+
+      Homey.emit('get_device').then(function(device) {
+        if (device) {
+          document.getElementById('name').textContent = device.name || 'FreeGrilly';
+          document.getElementById('ip').textContent = (device.settings && device.settings.ip) ? device.settings.ip : '';
+        }
+
+        document.getElementById('btn').addEventListener('click', function() {
+          var btn = document.getElementById('btn');
+          var errorEl = document.getElementById('error');
+          btn.classList.add('loading');
+          btn.textContent = 'Adding…';
+          errorEl.textContent = '';
+
+          Homey.createDevice(device, function(err) {
+            if (err) {
+              btn.classList.remove('loading');
+              btn.textContent = 'Add device';
+              errorEl.textContent = err.message || 'Failed to add device.';
+            } else {
+              Homey.done();
+            }
+          });
+        });
+      }).catch(function(err) {
+        document.getElementById('error').textContent = 'Could not load device info.';
+      });
+    }
+  </script>
+</body>
+</html>
