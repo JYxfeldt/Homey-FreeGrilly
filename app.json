@@ -1,6 +1,6 @@
 {
   "id": "se.yxfeldt.freegrilly",
-  "version": "0.1.5",
+  "version": "0.1.7",
   "compatibility": ">=12.0.0",
   "sdk": 3,
   "platforms": [
@@ -98,7 +98,15 @@
       },
       "pair": [
         {
-          "id": "start"
+          "id": "login_credentials",
+          "template": "login_credentials",
+          "options": {
+            "title": "Connect to FreeGrilly",
+            "hint": "Enter the IP address of your FreeGrilly thermometer (e.g. 192.168.1.100). The default AP address is 192.168.200.10.",
+            "usernameLabel": "IP Address",
+            "passwordLabel": "Password",
+            "showPasswordField": false
+          }
         },
         {
           "id": "list_devices",
