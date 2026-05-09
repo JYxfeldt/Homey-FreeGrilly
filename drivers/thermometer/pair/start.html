@@ -35,9 +35,11 @@
       font-size: 15px;
       font-weight: 500;
       cursor: pointer;
+      pointer-events: auto !important;
+      opacity: 1 !important;
     }
-    button:disabled {
-      background: #ccc;
+    button.loading {
+      background: #aaa;
       cursor: not-allowed;
     }
     .error {
@@ -58,12 +60,23 @@
   <script>
     function onHomeyReady(Homey) {
       Homey.ready();
+      init(Homey);
+    }
 
-      document.getElementById('btn').addEventListener('click', function () {
+    // Fallback in case onHomeyReady is delayed or called differently
+    if (typeof window !== 'undefined') {
+      window.onHomeyReady = function(Homey) {
+        Homey.ready();
+        init(Homey);
+      };
+    }
+
+    function init(Homey) {
+      var btn = document.getElementById('btn');
+      var errorEl = document.getElementById('error');
+
+      btn.addEventListener('click', function () {
         var ip = document.getElementById('ip').value.trim();
-        var errorEl = document.getElementById('error');
-        var btn = document.getElementById('btn');
-
         errorEl.textContent = '';
 
         if (!ip) {
@@ -71,20 +84,31 @@
           return;
         }
 
-        btn.disabled = true;
+        btn.classList.add('loading');
         btn.textContent = 'Connecting…';
 
-        Homey.emit('validate', ip, function (err) {
-          btn.disabled = false;
+        function onSuccess() {
+          btn.classList.remove('loading');
           btn.textContent = 'Connect';
-
-          if (err) {
-            errorEl.textContent = err.message || 'Could not connect to the device. Check the IP address and try again.';
-            return;
-          }
-
           Homey.nextView();
+        }
+
+        function onError(err) {
+          btn.classList.remove('loading');
+          btn.textContent = 'Connect';
+          errorEl.textContent = (err && err.message)
+            ? err.message
+            : 'Could not connect to the device. Check the IP address and try again.';
+        }
+
+        // Support both Promise-based (SDK3 modern) and callback-based emit
+        var result = Homey.emit('validate', ip, function (err) {
+          if (err) { onError(err); } else { onSuccess(); }
         });
+
+        if (result && typeof result.then === 'function') {
+          result.then(onSuccess).catch(onError);
+        }
       });
     }
   </script>
