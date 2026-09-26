@@ -18,9 +18,10 @@ class FreeGrillyDriver extends Homey.Driver {
       ip = ip.trim();
       if (!IPV4_RE.test(ip)) throw new Error('Enter a valid IPv4 address (e.g. 192.168.1.100)');
       const data = await this._fetchGrill(ip);
+      if (!data.unique_id) throw new Error('Device did not return a unique ID. Please update the FreeGrilly firmware.');
       pendingDevice = {
         name: data.name || 'FreeGrilly',
-        data: { id: data.unique_id || ip },
+        data: { id: data.unique_id },
         settings: { ip, poll_interval: 5 },
       };
       return true;
