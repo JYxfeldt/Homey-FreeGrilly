@@ -38,16 +38,23 @@ app.json                            # SDK3 manifest: driver, capabilities, setti
 drivers/thermometer/
   driver.js                         # Homey.Driver — handles pairing session
   device.js                         # Homey.Device — HTTP polling loop, capability updates
-  pair/start.html                   # Pairing UI: IP address input form
+  pair/confirm.html                 # Pairing step 2: confirm device and call createDevice
   assets/icon.svg                   # Driver icon
 assets/icon.svg                     # App icon
 locales/en.json                     # English strings
 ```
 
+### Pair flow
+
+`app.json` defines two steps:
+
+1. `login_credentials` (built-in template) — user enters the IP address. Homey calls the `login` session handler in `driver.js`, which validates the IP format, fetches `/api/grill`, and stores the device in a closure-scoped `pendingDevice` variable.
+2. `confirm` (custom view `pair/confirm.html`) — calls `get_device` to retrieve `pendingDevice`, shows the device name and IP, and calls `Homey.createDevice()` (supports both Promise and callback APIs) when the user taps **Add device**.
+
 ### Data flow
 
-1. **Pairing** (`driver.js` + `pair/start.html`): the user enters the device IP; the driver calls `GET /api/grill` to validate connectivity, then stores the IP in device settings.
-2. **Polling** (`device.js`): on `onInit`, a `homey.setInterval` loop fires every `poll_interval` seconds (default 5 s). Each tick calls `GET /api/grill` using the built-in `http` module.
+1. **Pairing** — see pair flow above.
+2. **Polling** (`device.js`): on `onInit`, a recursive `setTimeout` loop fires every `poll_interval` seconds (default 5 s). Each iteration awaits the previous poll before scheduling the next, preventing overlapping requests. Each tick calls `GET /api/grill` using the built-in `http` module.
 3. **Sync**: the response is mapped to Homey capabilities — eight `measure_temperature.probeN` values, `measure_battery`, and `alarm_battery` (fires below 20 %). If the device returns Fahrenheit (`temperature_unit === 'fahrenheit'`), temperatures are converted to Celsius before being written.
 4. **Availability**: `setAvailable()` / `setUnavailable(message)` are called on each poll to reflect connectivity state in the Homey UI.
 
@@ -71,10 +78,13 @@ The default device IP in AP mode is `192.168.200.10`. After connecting to home W
 
 ## Key Conventions
 
-- All intervals use `this.homey.setInterval` / `this.homey.clearInterval` (SDK3 requirement — global `setInterval` is not available).
-- HTTP calls use the Node.js built-in `http` module with a 5-second `timeout` option — no npm dependencies.
+- Polling uses a recursive `this.homey.setTimeout` loop (not `setInterval`) so each poll fully completes before the next is scheduled, preventing overlapping HTTP requests. Use `this.homey.clearTimeout` to stop it.
+- HTTP calls use the Node.js built-in `http` module with a 5-second `timeout` option — no npm dependencies. Always check `res.statusCode === 200` before reading the body.
+- `_fetchGrill(ip)` uses a `settled` flag to ensure the returned Promise is resolved or rejected exactly once, even when `req.destroy()` triggers both the `timeout` and `error` events.
+- Response bodies are capped at 64 KB (`MAX_BODY_BYTES`) to prevent memory exhaustion from a misbehaving device.
 - The `_fetchGrill(ip)` helper is duplicated between `driver.js` and `device.js` intentionally; do not introduce a shared module unless the codebase grows significantly.
-- Settings changes (`onSettings`) tear down and restart the polling timer so the new IP and interval take effect immediately.
+- Settings changes (`onSettings`) call `_clearPolling()` then restart `_pollLoop()` immediately so the new IP and interval take effect without waiting for the current timer to expire. An in-flight `_poll()` completes safely — it checks `_stopPolling` before scheduling the next tick.
+- IP addresses are validated as IPv4 format in the `login` pair handler before any network call is made.
 
 ## Publishing Checklist
 
