@@ -60,24 +60,32 @@
           document.getElementById('ip').textContent = (device.settings && device.settings.ip) ? device.settings.ip : '';
         }
 
-        document.getElementById('btn').addEventListener('click', function() {
-          var btn = document.getElementById('btn');
-          var errorEl = document.getElementById('error');
+        var btn = document.getElementById('btn');
+        var errorEl = document.getElementById('error');
+
+        btn.addEventListener('click', function() {
           btn.classList.add('loading');
           btn.textContent = 'Adding…';
           errorEl.textContent = '';
 
-          Homey.createDevice(device, function(err) {
-            if (err) {
-              btn.classList.remove('loading');
-              btn.textContent = 'Add device';
-              errorEl.textContent = err.message || 'Failed to add device.';
-            } else {
-              Homey.done();
-            }
+          function onSuccess() {
+            Homey.done();
+          }
+
+          function onError(err) {
+            btn.classList.remove('loading');
+            btn.textContent = 'Add device';
+            errorEl.textContent = (err && err.message) ? err.message : 'Failed to add device.';
+          }
+
+          var result = Homey.createDevice(device, function(err) {
+            if (err) { onError(err); } else { onSuccess(); }
           });
+          if (result && typeof result.then === 'function') {
+            result.then(onSuccess).catch(onError);
+          }
         });
-      }).catch(function(err) {
+      }).catch(function() {
         document.getElementById('error').textContent = 'Could not load device info.';
       });
     }
